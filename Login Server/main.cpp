@@ -97,7 +97,7 @@ void main()
 
 		string answer = "Answer";
 		// Echo message back to client
-		send(clientSocket, answer.c_str(), answer.size(), 0);
+		send(clientSocket, answer.c_str(), answer.size() + 1, 0);
 	}
 
 	// Close the socket
