@@ -1,121 +1,35 @@
 #include <iostream>
-#include <WS2tcpip.h>
 #include <string>
 
-#pragma comment (lib, "ws2_32.lib")
+#include "Database.h"
+#include "TCPListener.h"
 
 using namespace std;
 
-void main()
+Database db("db.txt");
+
+void Listener_MessageReceived(TCPListener* listener, int client, string msg);
+
+int main()
 {
-	// Initialize winsock
+	TCPListener server("127.0.0.1", 54000, Listener_MessageReceived);
 
-	WSADATA wsData;
-	WORD ver = MAKEWORD(2, 2);
-
-	int wsOk = WSAStartup(ver, &wsData);
-	if (wsOk != 0)
+	if (server.Init())
 	{
-		cerr << "Can't initialize winsock!" << endl;
-		return;
+		server.Run();
 	}
+}
 
-	// Create a socket
-
-	SOCKET listening = socket(AF_INET, SOCK_STREAM, 0);
-	if (listening == INVALID_SOCKET)
+void Listener_MessageReceived(TCPListener* listener, int client, string msg)
+{
+	if (db.checkLoginPassword(msg))
 	{
-		cerr << "Can't create a socket" << endl;
-		return;
-	}
-
-	// Bind the IP address and port to a socket
-
-	sockaddr_in hint;
-	hint.sin_family = AF_INET;
-	hint.sin_port = htons(54000);
-	hint.sin_addr.S_un.S_addr = INADDR_ANY;
-
-	bind(listening, (sockaddr*)&hint, sizeof(hint));
-
-	// Tell Winsock the socket is for listening
-	listen(listening, SOMAXCONN);
-
-	// Wait for a connection
-
-	sockaddr_in client;
-	int clientSize = sizeof(client);
-
-	SOCKET clientSocket = accept(listening, (sockaddr*)&client, &clientSize);
-	if (clientSocket == INVALID_SOCKET)
-	{
-		cerr << "Invalid socket" << endl;
-		return;
-	}
-
-	char host[NI_MAXHOST];		// Client's remote name
-	char service[NI_MAXHOST];	// Service (i.e. port) the client is connect on
-
-	ZeroMemory(host, NI_MAXHOST);
-	ZeroMemory(service, NI_MAXHOST);
-
-	if (getnameinfo((sockaddr*)&client, sizeof(client), host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0)
-	{
-		cout << host << " connected on port " << service << endl;
+		cout << "Client entered wrong details." << endl;
+		listener->Send(client, "Wrong username or password.");
 	}
 	else
 	{
-		inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-		cout << host << " connected on port " <<
-			ntohs(client.sin_port) << endl;
+		cout << "Client logged in!" << endl;
+		listener->Send(client, "Logged in!");
 	}
-
-	// Close listening socket
-	closesocket(listening);
-
-	// While loop: accept and echo message back to client
-
-	char buf[4096];
-
-	while (true)
-	{
-		ZeroMemory(buf, 4096);
-
-		// Wait for client to send data
-		int bytesReceived = recv(clientSocket, buf, 4096, 0);
-		if (bytesReceived == SOCKET_ERROR)
-		{
-			cerr << "Error in recv()." << endl;
-			return;
-		}
-
-		if (bytesReceived == 0)
-		{
-			cout << "Client disconnected." << endl;
-			break;
-		}
-
-		// Check login and password
-		string loginPassword = string(buf, 0, bytesReceived);
-		string correctLoginPassword = "m 1";
-		if (loginPassword.compare(correctLoginPassword))
-		{
-			string wrong = "Wrong username or password.";
-			cout << "Client entered wrong details." << endl;
-			send(clientSocket, wrong.c_str(), sizeof(wrong) + 1, 0);
-		}
-		else
-		{
-			string loggedIn = "Logged in!";
-			cout << "Client logged in!" << endl;
-			send(clientSocket, loggedIn.c_str(), sizeof(loggedIn) + 1, 0);
-			break;
-		}
-	}
-
-	// Close the socket
-	closesocket(clientSocket);
-
-	// Cleanup winsock
-	WSACleanup();
 }
