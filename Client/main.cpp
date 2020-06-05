@@ -51,16 +51,20 @@ void main()
 
 	// Send and receive data
 	char buf[4096];
-	string userInput;
+	string login;
+	string pass;
 
 	do
 	{
-		cout << ">";
-		getline(cin, userInput);
+		cout << "Login: ";
+		cin >> login;
+		cout << "Password: ";
+		cin >> pass;
+		string loginPass = login + " " + pass;
 
-		if (userInput.size() > 0)
+		if (loginPass.size() > 0)
 		{
-			int sendResult = send(sock, userInput.c_str(), userInput.size() + 1, 0);
+			int sendResult = send(sock, loginPass.c_str(), loginPass.size() + 1, 0);
 			// size() + 1 because in C every string ends with 0 character
 			if (sendResult != SOCKET_ERROR)
 			{
@@ -70,12 +74,19 @@ void main()
 				if (bytesReceived > 0)
 				{
 					// Echo response to console
-					cout << "SERVER> " << string(buf, 0, bytesReceived) << endl;
+					string response = string(buf, 0, bytesReceived);
+					cout << "SERVER> " << response << endl;
+
+					// Check if logged in
+					if (!response.compare("Logged in!"))
+					{
+						break;
+					}
 				}
 			}
 		}
 
-	} while (userInput.size() > 0);
+	} while (login.size() > 0);
 
 	closesocket(sock);
 	WSACleanup();

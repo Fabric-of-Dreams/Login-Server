@@ -95,9 +95,22 @@ void main()
 			break;
 		}
 
-		string answer = "Answer";
-		// Echo message back to client
-		send(clientSocket, answer.c_str(), answer.size() + 1, 0);
+		// Check login and password
+		string loginPassword = string(buf, 0, bytesReceived);
+		string correctLoginPassword = "m 1";
+		if (loginPassword.compare(correctLoginPassword))
+		{
+			string wrong = "Wrong username or password.";
+			cout << "Client entered wrong details." << endl;
+			send(clientSocket, wrong.c_str(), sizeof(wrong) + 1, 0);
+		}
+		else
+		{
+			string loggedIn = "Logged in!";
+			cout << "Client logged in!" << endl;
+			send(clientSocket, loggedIn.c_str(), sizeof(loggedIn) + 1, 0);
+			break;
+		}
 	}
 
 	// Close the socket
