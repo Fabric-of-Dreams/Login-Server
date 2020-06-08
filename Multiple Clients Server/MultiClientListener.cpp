@@ -1,6 +1,10 @@
 #include "MultiClientListener.h"
 #include <string>
 
+#include "Database.h"
+
+Database db("db.txt");
+
 // Handler for client connections
 void MultiClientListener::onClientConnected(int clientSocket)
 {
@@ -16,5 +20,14 @@ void MultiClientListener::onClientDisconnected(int clientSocket)
 void MultiClientListener::onMessageReceived(int sock, const char* msg, int bytesIn)
 {
 	std::cout << std::string(msg, 0, bytesIn) << std::endl;
-	sendToClient(sock, "I don't check your password");
+	if (db.checkLoginPassword(msg))
+	{
+		std::cout << "Client entered wrong details." << std::endl;
+		sendToClient(sock, "Wrong username or password.");
+	}
+	else
+	{
+		std::cout << "Client logged in!" << std::endl;
+		sendToClient(sock, "Logged in!");
+	}
 }
