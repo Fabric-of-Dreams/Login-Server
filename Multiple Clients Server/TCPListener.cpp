@@ -1,5 +1,7 @@
 #include "TCPListener.h"
 
+#include <iostream>
+
 TCPListener::TCPListener(const char* ipAddress, int port) :
 	m_ipAddress(ipAddress), m_port(port)
 {

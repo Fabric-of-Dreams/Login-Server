@@ -1,11 +1,11 @@
 #pragma once
 #include "TCPListener.h"
 
-class MultiClientListener : public TCPListener
+class WebServer : public TCPListener
 {
 public:
 
-	MultiClientListener(const char* ipAddress, int port) :
+	WebServer (const char* ipAddress, int port) :
 		TCPListener(ipAddress, port)
 	{
 
@@ -19,6 +19,6 @@ protected:
 	// Handler for client disconnections
 	virtual void onClientDisconnected(int clientSocket);
 
-	virtual void onMessageReceived(int sock, const char* msg, int bytesIn);
+	virtual void onMessageReceived(int clientSocket, const char* msg, int bytesIn);
 };
 
