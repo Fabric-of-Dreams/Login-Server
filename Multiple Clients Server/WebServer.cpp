@@ -22,7 +22,14 @@ void WebServer::onMessageReceived(int clientSocket, const char* msg, int bytesIn
 	// GET, name of the document (e.g. /index.html), HTTP/1.1
 	if (parsed.size() >= 3 && parsed[0] == "GET")
 	{
-		htmlFile = parsed[1];
+		if (parsed[1] == "/")
+		{
+			htmlFile = "/index.html";
+		}
+		else
+		{
+			htmlFile = parsed[1];
+		}
 	}
 
 	// Open the document in the local file system
