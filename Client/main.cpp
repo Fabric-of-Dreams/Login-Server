@@ -4,11 +4,9 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-using namespace std;
-
 void main()
 {
-	string serverIP = "127.0.0.1";
+	std::string serverIP = "127.0.0.1";
 	int port = 54000;				// listening port on the server
 
 	// Initialize winsock
@@ -19,7 +17,7 @@ void main()
 	int wsOk = WSAStartup(ver, &wsData);
 	if (wsOk != 0)
 	{
-		cerr << "Can't initialize winsock!" << endl;
+		std::cerr << "Can't initialize winsock!" << std::endl;
 		return;
 	}
 
@@ -27,7 +25,7 @@ void main()
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock == INVALID_SOCKET)
 	{
-		cerr << "Can't create socket, Err #" << WSAGetLastError()<< endl;
+		std::cerr << "Can't create socket, Err #" << WSAGetLastError()<< std::endl;
 		WSACleanup();
 		return;
 	}
@@ -43,7 +41,7 @@ void main()
 	int connResult = connect(sock, (sockaddr*)&server, sizeof(server));
 	if (connResult == SOCKET_ERROR)
 	{
-		cerr << "Can't connect to server, Err #" << WSAGetLastError() << endl;
+		std::cerr << "Can't connect to server, Err #" << WSAGetLastError() << std::endl;
 		closesocket(sock);
 		WSACleanup();
 		return;
@@ -51,16 +49,16 @@ void main()
 
 	// Send and receive data
 	char buf[4096];
-	string login;
-	string pass;
+	std::string login;
+	std::string pass;
 
 	do
 	{
-		cout << "Login: ";
-		cin >> login;
-		cout << "Password: ";
-		cin >> pass;
-		string loginPass = login + " " + pass;
+		std::cout << "Login: ";
+		std::cin >> login;
+		std::cout << "Password: ";
+		std::cin >> pass;
+		std::string loginPass = login + " " + pass;
 
 		if (loginPass.size() > 0)
 		{
@@ -74,8 +72,8 @@ void main()
 				if (bytesReceived > 0)
 				{
 					// Echo response to console
-					string response = string(buf, 0, bytesReceived);
-					cout << "SERVER> " << response << endl;
+					std::string response = std::string(buf, 0, bytesReceived);
+					std::cout << "SERVER> " << response << std::endl;
 
 					// Check if logged in
 					if (!response.compare("Logged in!"))
